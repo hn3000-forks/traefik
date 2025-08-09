@@ -1,6 +1,7 @@
 name: Test K8s Gateway API conformance
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - '*'
