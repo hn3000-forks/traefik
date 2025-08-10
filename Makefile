@@ -94,7 +94,7 @@ test-unit:
 .PHONY: test-integration
 #? test-integration: Run the integration tests
 test-integration:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go test ./integration -test.timeout=20m -failfast -v $(TESTFLAGS)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go test ./integration -test.timeout=20m -v $(TESTFLAGS) # -failfast
 
 .PHONY: test-gateway-api-conformance
 #? test-gateway-api-conformance: Run the conformance tests

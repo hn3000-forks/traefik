@@ -442,17 +442,42 @@ func buildProxyProtocolListener(ctx context.Context, entryPoint *static.EntryPoi
 	if err != nil {
 		return nil, err
 	}
+	/*
+		proxyListener.Policy = func(upstream net.Addr) (proxyproto.Policy, error) {
+			ipAddr, ok := upstream.(*net.TCPAddr)
+			if !ok {
+				return proxyproto.REJECT, fmt.Errorf("type error %v", upstream)
+			}
 
-	proxyListener.Policy = func(upstream net.Addr) (proxyproto.Policy, error) {
-		ipAddr, ok := upstream.(*net.TCPAddr)
-		if !ok {
-			return proxyproto.REJECT, fmt.Errorf("type error %v", upstream)
+			if !checker.ContainsIP(ipAddr.IP) {
+				log.Ctx(ctx).Debug().Msgf("IP %s is not in trusted IPs list, ignoring ProxyProtocol Headers and bypass connection", ipAddr.IP)
+				return proxyproto.IGNORE, nil
+			}
+			return proxyproto.USE, nil
+		}
+	*/
+	/*
+		proxyHeaderPolicy, err = p.ConnPolicy(ConnPolicyOptions{
+			Upstream:   conn.RemoteAddr(),
+			Downstream: conn.LocalAddr(),
+		})
+	*/
+	proxyListener.ConnPolicy = func(connPolicyOptions proxyproto.ConnPolicyOptions) (proxyproto.Policy, error) {
+		rawAddress := connPolicyOptions.Upstream.String()
+		rawIP, _, addrErr := net.SplitHostPort(rawAddress)
+		if nil != addrErr {
+			return proxyproto.REJECT, fmt.Errorf("type error: bad Addr %v", rawAddress)
 		}
 
-		if !checker.ContainsIP(ipAddr.IP) {
-			log.Ctx(ctx).Debug().Msgf("IP %s is not in trusted IPs list, ignoring ProxyProtocol Headers and bypass connection", ipAddr.IP)
+		address := net.ParseIP(rawIP)
+		if nil == address {
+			return proxyproto.REJECT, fmt.Errorf("type error: bad IP %v", rawIP)
+		}
+		if !checker.ContainsIP(address) {
+			log.Ctx(ctx).Debug().Msgf("IP %s is not in trusted IPs list, ignoring ProxyProtocol Headers and bypass connection", rawAddress)
 			return proxyproto.IGNORE, nil
 		}
+		log.Ctx(ctx).Debug().Msgf("trusting connection %s -> %s", connPolicyOptions.Upstream.String(), connPolicyOptions.Downstream.String())
 		return proxyproto.USE, nil
 	}
 

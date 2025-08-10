@@ -162,7 +162,7 @@ func proxyProtoRequest6(address string, version byte) (string, error) {
 	// Open a TCP connection to the server
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		return "", err
+		return "(Dial failed)", err
 	}
 	defer conn.Close()
 
@@ -184,7 +184,7 @@ func proxyProtoRequest6(address string, version byte) (string, error) {
 	// After the connection was created write the proxy headers first
 	_, err = proxyHeader.WriteTo(conn)
 	if err != nil {
-		return "", err
+		return "(proxyHeader.WriteTo failed)", err
 	}
 
 	// Create an HTTP request
@@ -197,13 +197,13 @@ func proxyProtoRequest6(address string, version byte) (string, error) {
 	writer := bufio.NewWriter(conn)
 	_, err = writer.WriteString(request)
 	if err != nil {
-		return "", err
+		return "(writer.WriteString failed)", err
 	}
 
 	// Flush the buffer to ensure the request is sent
 	err = writer.Flush()
 	if err != nil {
-		return "", err
+		return "(writer.Flush failed)", err
 	}
 
 	// Read the response from the server
@@ -214,7 +214,7 @@ func proxyProtoRequest6(address string, version byte) (string, error) {
 	}
 
 	if scanner.Err() != nil {
-		return "", err
+		return "(scanner failed)", err
 	}
 
 	return content, nil
