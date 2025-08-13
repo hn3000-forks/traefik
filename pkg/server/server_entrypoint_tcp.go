@@ -474,7 +474,7 @@ func buildProxyProtocolListener(ctx context.Context, entryPoint *static.EntryPoi
 			return proxyproto.REJECT, fmt.Errorf("type error: bad IP %v", rawIP)
 		}
 		if !checker.ContainsIP(address) {
-			log.Ctx(ctx).Debug().Msgf("IP %s is not in trusted IPs list, ignoring ProxyProtocol Headers and bypass connection", rawAddress)
+			log.Ctx(ctx).Debug().Msgf("IP %s is not in trusted IPs list %v, ignoring ProxyProtocol Headers and bypass connection", rawAddress, entryPoint.ProxyProtocol.TrustedIPs)
 			return proxyproto.IGNORE, nil
 		}
 		log.Ctx(ctx).Debug().Msgf("trusting connection %s -> %s", connPolicyOptions.Upstream.String(), connPolicyOptions.Downstream.String())
